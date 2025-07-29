@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { 
+  color-scheme: dark; 
+  --accent: #ff2bd9; /* neon‑pink default for landing */
+}
+html, body { @apply bg-black text-white min-h-screen; }
+
+.theme-user { @apply [--accent:#39FF14]; }
+.theme-rater { @apply [--accent:#00D1FF]; }
+
+.btn-3d { @apply rounded-full font-semibold px-5 py-3 transition-transform duration-150 active:translate-y-0.5; }
+.btn-primary-3d { box-shadow: 0 8px 0 rgba(255,255,255,.1); }
+.btn-primary-3d:hover { transform: translateY(-1px); }
+
+.glass { @apply bg-white/5 backdrop-blur border border-white/10; }
+.route { @apply animate-fade-in-up; }
+
+.arrow-between { @apply relative; }
+.arrow-between::after {
+  content: "→";
+  @apply absolute -right-6 top-1/2 -translate-y-1/2 text-white/60 text-2xl;
+}
+.steps-grid > .arrow-between:last-child::after { content: ""; }
+
+.hero {
+  background-image: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)), url("/friends.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.card { @apply glass rounded-2xl p-6; }
+.card-title { @apply text-xl font-bold; }
+.card-sub { @apply text-sm text-zinc-400; }
+.linkish { @apply underline underline-offset-4 decoration-white/30 hover:decoration-white; }
+
+footer { @apply border-t border-white/10; }
