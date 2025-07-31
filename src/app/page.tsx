@@ -1,6 +1,6 @@
-
 // src/app/page.tsx
 import Link from "next/link";
+import { Suspense } from "react";
 import Container from "@/components/container";
 import LogoutOnHome from "@/components/LogoutOnHome";
 import HeroCTA from "@/components/HeroCTA";
@@ -23,7 +23,9 @@ export default function HomePage() {
   return (
     <main className="route">
       {/* Handles ?logout=1 → signs out and cleans URL */}
-      <LogoutOnHome />
+      <Suspense fallback={null}>
+        <LogoutOnHome />
+      </Suspense>
 
       {/* Hero */}
       <section className="hero border-b border-white/10">
