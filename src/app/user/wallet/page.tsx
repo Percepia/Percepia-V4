@@ -1,37 +1,53 @@
-"use client";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
-import BackButton from "@/components/back-button";
-import Modal from "@/components/modal";
-import { useState } from "react";
+import Link from "next/link";
 
-export default function Wallet() {
-  const [open, setOpen] = useState(false);
+export default function WalletPage() {
   return (
-    <>
-      <Navbar />
-      <main className="route theme-user">
-        <section className="py-10 space-y-6">
-          <Container>
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-black">Wallet</h2>
-              <BackButton />
+    <main className="route">
+      <section className="py-12">
+        <Container>
+          <h1 className="text-3xl font-black">Wallet</h1>
+          <p className="text-zinc-300 mt-2">
+            Manage your coins and recent transactions.
+          </p>
+
+          <div className="grid lg:grid-cols-2 gap-6 mt-8">
+            <div className="card p-6">
+              <div className="text-sm text-zinc-400">Current Balance</div>
+              <div className="text-4xl font-black mt-2">320</div>
+              <div className="mt-4 flex gap-3">
+                <Link
+                  href="/user/wallet/buy"
+                  className="btn-3d btn-primary-3d bg-[--accent] text-black px-5 py-2 rounded-full"
+                >
+                  Buy Coins
+                </Link>
+                <Link
+                  href="/user/wallet/earn"
+                  className="btn-3d px-5 py-2 rounded-full border border-white/10"
+                >
+                  Earn Coins
+                </Link>
+              </div>
             </div>
-            <div className="card flex items-center gap-4">
-              <div className="text-zinc-300">Balance:</div>
-              <div className="text-2xl font-bold">120 coins</div>
-              <button onClick={()=>setOpen(true)} className="ml-auto btn-3d bg-[--accent] text-black rounded-full px-5 py-3 shadow-neon-user">
-                Buy coins
-              </button>
+
+            <div className="card p-6">
+              <div className="font-semibold">Recent Activity</div>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li className="flex justify-between">
+                  <span>Request feedback</span><span>-20</span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Coins purchased</span><span>+200</span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Referral bonus</span><span>+20</span>
+                </li>
+              </ul>
             </div>
-          </Container>
-        </section>
-      </main>
-      <Footer />
-      <Modal open={open} onClose={()=>setOpen(false)} title="Add coins">
-        This is a simulation. Payment integration is not connected in this demo.
-      </Modal>
-    </>
+          </div>
+        </Container>
+      </section>
+    </main>
   );
 }

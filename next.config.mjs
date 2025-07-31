@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    unoptimized: true
+  async redirects() {
+    return [
+      { source: "/user/new-request", destination: "/user/request", permanent: false },
+      { source: "/user/requests", destination: "/user/request", permanent: false },
+    ];
   },
-  experimental: {
-    typedRoutes: true
-  }
 };
+
 export default nextConfig;

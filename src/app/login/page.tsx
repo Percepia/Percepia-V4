@@ -1,30 +1,24 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import Container from "@/components/container";
+"use client";
 import Link from "next/link";
 
-export default function Login() {
+export default function LoginSelector() {
   return (
-    <>
-      <Navbar />
-      <main className="route">
-        <section className="py-16">
-          <Container>
-            <h2 className="text-3xl font-black mb-6">Who are you?</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Link href="/login/user" className="card hover:shadow-neon-user transition-shadow">
-                <div className="card-title">Continue as User</div>
-                <div className="card-sub">Ask raters & receive feedback.</div>
-              </Link>
-              <Link href="/login/rater" className="card hover:shadow-neon-rater transition-shadow">
-                <div className="card-title">Continue as Rater</div>
-                <div className="card-sub">Help others & earn coins.</div>
-              </Link>
-            </div>
-          </Container>
-        </section>
-      </main>
-      <Footer />
-    </>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black/40 p-4">
+      <h1 className="text-5xl text-white font-bold mb-12">Log in as…</h1>
+      <div className="flex flex-col space-y-8">
+        <Link
+          href="/login/user"
+          className="w-72 text-center py-6 bg-pink-500 hover:bg-pink-600 rounded-3xl text-white text-2xl font-semibold transition"
+        >
+          I’m a User
+        </Link>
+        <Link
+          href="/login/rater"
+          className="w-72 text-center py-6 bg-blue-500 hover:bg-blue-600 rounded-3xl text-white text-2xl font-semibold transition"
+        >
+          I’m a Rater
+        </Link>
+      </div>
+    </div>
   );
 }

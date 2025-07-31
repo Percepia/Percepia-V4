@@ -1,6 +1,4 @@
 "use client";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
 import BackButton from "@/components/back-button";
 import Modal from "@/components/modal";
@@ -10,7 +8,6 @@ export default function Earnings() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Navbar />
       <main className="route theme-rater">
         <section className="py-10 space-y-6">
           <Container>
@@ -28,7 +25,6 @@ export default function Earnings() {
           </Container>
         </section>
       </main>
-      <Footer />
       <Modal open={open} onClose={()=>setOpen(false)} title="Withdraw coins">
         You can swap coins for real money. (Payout methods are not connected in this demo.)
       </Modal>

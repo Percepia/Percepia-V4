@@ -1,33 +1,39 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
-import BackButton from "@/components/back-button";
-import Table from "@/components/table";
+import Link from "next/link";
 
-export default function History() {
-  const columns = ["Date","Topic","Rater","Status"];
-  const rows = [
-    ["2025-07-01","Outfit check","Camille Dubois","Completed"],
-    ["2025-07-05","First impression","Aarav Sharma","Completed"],
-    ["2025-07-10","Grooming","Diego Ramirez","Pending"],
-  ];
+const mock = [
+  { id: "101", title: "First date outfit", status: "Completed", date: "24 Jul 2025" },
+  { id: "102", title: "Hair & beard trim", status: "Awaiting feedback", date: "27 Jul 2025" },
+  { id: "103", title: "Interview suit", status: "Completed", date: "29 Jul 2025" },
+];
+
+export default function HistoryPage() {
   return (
-    <>
-      <Navbar />
-      <main className="route theme-user">
-        <section className="py-10 space-y-6">
-          <Container>
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-black">History</h2>
-              <BackButton />
-            </div>
-            <div className="card">
-              <Table columns={columns} rows={rows} />
-            </div>
-          </Container>
-        </section>
-      </main>
-      <Footer />
-    </>
+    <main className="route">
+      <section className="py-12">
+        <Container>
+          <h1 className="text-3xl font-black">Your History</h1>
+          <p className="text-zinc-300 mt-2">
+            Previous requests and feedback.
+          </p>
+
+          <div className="grid gap-4 mt-8">
+            {mock.map((item) => (
+              <div key={item.id} className="card p-5 flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">{item.title}</div>
+                  <div className="text-sm text-zinc-400">
+                    Status: {item.status} • {item.date}
+                  </div>
+                </div>
+                <Link href={`/user/history/${item.id}`} className="text-[--accent] underline">
+                  View
+                </Link>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+    </main>
   );
 }

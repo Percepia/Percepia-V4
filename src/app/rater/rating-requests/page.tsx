@@ -1,5 +1,3 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
 import BackButton from "@/components/back-button";
 import Table from "@/components/table";
@@ -13,7 +11,6 @@ export default function RatingRequests() {
   ];
   return (
     <>
-      <Navbar />
       <main className="route theme-rater">
         <section className="py-10 space-y-6">
           <Container>
@@ -27,7 +24,6 @@ export default function RatingRequests() {
           </Container>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

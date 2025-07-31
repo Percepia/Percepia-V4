@@ -1,37 +1,111 @@
 "use client";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import Container from "@/components/container";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
-export default function LoginUser() {
-  const router = useRouter();
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+export default function UserLoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/user");
-  }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = "/user";
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      window.location.href = "/user";
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      await signInWithPopup(auth, new FacebookAuthProvider());
+      window.location.href = "/user";
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
-    <>
-      <Navbar />
-      <main className="route theme-user">
-        <section className="py-16">
-          <Container>
-            <h2 className="text-3xl font-black mb-6">Log in (User)</h2>
-            <form onSubmit={onSubmit} className="card grid gap-3 max-w-md">
-              <input type="email" required className="rounded bg-black border border-white/10 p-3" placeholder="Email" />
-              <input type="password" required className="rounded bg-black border border-white/10 p-3" placeholder="Password" />
-              <button className="btn-3d bg-[--accent] text-black rounded-full px-5 py-3 shadow-neon-user">Log in</button>
-              <div className="text-sm text-zinc-400">Or continue with:</div>
-              <div className="flex gap-3">
-                <button type="button" className="glass rounded-full px-4 py-2">Google</button>
-                <button type="button" className="glass rounded-full px-4 py-2">Facebook</button>
-                <button type="button" className="glass rounded-full px-4 py-2">Reddit</button>
-              </div>
-            </form>
-          </Container>
-        </section>
-      </main>
-      <Footer />
-    </>
+    <div className="relative w-full h-screen overflow-hidden">
+      <Image
+        src="/friends.jpg"
+        alt="Background"
+        fill
+        className="object-cover opacity-30"
+        priority
+      />
+
+      <div className="relative z-10 max-w-md w-full mx-auto top-1/2 -translate-y-1/2 p-8 bg-transparent space-y-6">
+        <h1 className="text-3xl font-bold text-white text-center">
+          User Log In
+        </h1>
+        {error && <p className="text-red-400">{error}</p>}
+
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 rounded bg-white/20 text-white placeholder-white/60"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 rounded bg-white/20 text-white placeholder-white/60"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="w-full py-3 rounded-3xl bg-pink-500 hover:bg-pink-600 font-semibold text-white transition"
+          >
+            Continue with Email
+          </button>
+        </form>
+
+        <div className="flex flex-col space-y-4">
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full py-3 rounded-3xl bg-red-600 hover:bg-red-700 text-white transition"
+          >
+            Continue with Google
+          </button>
+          <button
+            onClick={handleFacebookLogin}
+            className="w-full py-3 rounded-3xl bg-blue-800 hover:bg-blue-900 text-white transition"
+          >
+            Continue with Facebook
+          </button>
+        </div>
+
+        <p className="text-center text-sm text-white/70">
+          Don’t have an account?{" "}
+          <Link href="/signup" className="text-pink-400 hover:underline">
+            Sign up
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

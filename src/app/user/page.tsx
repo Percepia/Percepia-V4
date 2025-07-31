@@ -1,34 +1,47 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import Container from "@/components/container";
+// src/app/user/page.tsx
+import type { Route } from "next";
 import Link from "next/link";
+import Container from "@/components/container";
 
 export default function UserDashboard() {
   return (
-    <>
-      <Navbar />
-      <main className="route theme-user">
-        <section className="py-10">
-          <Container>
-            <h2 className="text-3xl font-black mb-6">User Dashboard</h2>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <Link href="/user/request" className="card rounded-2xl hover:shadow-neon-user transition-shadow">
-                <div className="text-xl font-bold">Ask a rater</div>
-                <div className="text-sm text-zinc-400">Start a new request</div>
-              </Link>
-              <Link href="/user/history" className="card hover:shadow-neon-user transition-shadow">
-                <div className="text-xl font-bold">History</div>
-                <div className="text-sm text-zinc-400">Previous requests</div>
-              </Link>
-              <Link href="/user/wallet" className="card hover:shadow-neon-user transition-shadow">
-                <div className="text-xl font-bold">Wallet</div>
-                <div className="text-sm text-zinc-400">Balance & purchases</div>
-              </Link>
-            </div>
-          </Container>
-        </section>
-      </main>
-      <Footer />
-    </>
+    <main className="route">
+      <section className="py-12">
+        <Container>
+          <h1 className="text-3xl font-black mb-6">Your dashboard</h1>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link
+              href={"/user/request" as Route}
+              className="card p-6 hover:border-white/30"
+            >
+              <div className="text-lg font-semibold">Ask a Rater</div>
+              <p className="text-sm text-zinc-400 mt-1">Create a new request.</p>
+            </Link>
+
+            {/* ✅ Correct link to History */}
+            <Link
+              href={"/user/history" as Route}
+              className="card p-6 hover:border-white/30"
+            >
+              <div className="text-lg font-semibold">History</div>
+              <p className="text-sm text-zinc-400 mt-1">
+                View your past requests & feedback.
+              </p>
+            </Link>
+
+            <Link
+              href={"/user/wallet" as Route}
+              className="card p-6 hover:border-white/30"
+            >
+              <div className="text-lg font-semibold">Wallet</div>
+              <p className="text-sm text-zinc-400 mt-1">
+                Coins and transactions.
+              </p>
+            </Link>
+          </div>
+        </Container>
+      </section>
+    </main>
   );
 }

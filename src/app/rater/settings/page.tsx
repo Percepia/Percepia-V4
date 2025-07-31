@@ -1,12 +1,9 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
 import BackButton from "@/components/back-button";
 
 export default function Settings() {
   return (
     <>
-      <Navbar />
       <main className="route theme-rater">
         <section className="py-10 space-y-6">
           <Container>
@@ -27,7 +24,6 @@ export default function Settings() {
           </Container>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

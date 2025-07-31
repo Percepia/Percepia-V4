@@ -1,5 +1,3 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Container from "@/components/container";
 import BackButton from "@/components/back-button";
 
@@ -15,7 +13,6 @@ function Stat({ title, value }:{ title:string, value:string }) {
 export default function Analytics() {
   return (
     <>
-      <Navbar />
       <main className="route theme-rater">
         <section className="py-10 space-y-6">
           <Container>
@@ -32,7 +29,6 @@ export default function Analytics() {
           </Container>
         </section>
       </main>
-      <Footer />
     </>
   );
 }
