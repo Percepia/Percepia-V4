@@ -130,7 +130,10 @@ export default function RequestWizardPage() {
       <section className="py-12">
         <Container>
           <h1 className="text-3xl font-black">Ask a Rater</h1>
-          <p className="text-zinc-300 mt-2">A quick four-step request: media -> details -> rater -> review.</p>
+          <p className="text-zinc-300 mt-2">
+            A quick four-step request: media → details → rater → review.
+          </p>
+
 
           <div className="mt-6 flex items-center gap-2 text-sm">
             {[1, 2, 3, 4].map((n) => (

@@ -1,13 +1,9 @@
-import Container from "@/components/container";
-
 export default function Footer() {
   return (
-    <footer className="py-10">
-      <Container>
-        <div className="text-center text-zinc-400">
-          © 2025 Percepia — all vibes reserved
-        </div>
-      </Container>
+    <footer className="mt-16 border-t border-white/10">
+      <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-white/50">
+        © {new Date().getFullYear()} Percepia
+      </div>
     </footer>
   );
 }
