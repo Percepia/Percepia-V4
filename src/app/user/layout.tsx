@@ -1,4 +1,4 @@
-// src/app/user/layout.tsx
+﻿// src/app/user/layout.tsx
 import type { Metadata } from "next";
 import UserNavBar from "./navbar";
 import UserFooter from "./footer";
