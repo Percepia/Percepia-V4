@@ -2,7 +2,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import AuthProvider from "@/components/AuthProvider";
-import ClientNav from "@/components/ClientNav";
 
 // Set this in .env.local for production: NEXT_PUBLIC_SITE_URL=https://percepia.app
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -58,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthProvider>
-          <ClientNav>{children}</ClientNav>
+          {children}
         </AuthProvider>
       </body>
     </html>
