@@ -1,20 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-export default function ClientNav({ children }: { children: React.ReactNode }) {
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
+
+type Props = { children: React.ReactNode };
+
+export default function ClientNav({ children }: Props) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
 
-  // Hide navbar/footer on auth pages
+  // Make the server and first client render identical
+  useEffect(() => setMounted(true), []);
+
+  // On server (and the first client render), render only children
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
+  // After mount, decide whether to show the public shell
+  const p = pathname || "";
   const hideShell =
-    pathname?.startsWith("/login") || pathname === "/auth/callback";
+    p.startsWith("/login") || p.startsWith("/user") || p.startsWith("/rater");
 
+  if (hideShell) {
+    return <>{children}</>;
+  }
+
+  // Public shell for marketing/public routes
   return (
     <>
-      {!hideShell && <Navbar />}
-      {children}
-      {!hideShell && <Footer />}
+      <NavBar />
+      <main>{children}</main>
+      <Footer />
     </>
   );
 }
