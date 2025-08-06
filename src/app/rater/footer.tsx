@@ -1,8 +1,9 @@
-export default function Footer() {
+// src/app/rater/footer.tsx
+export default function RaterFooter() {
   return (
-    <footer className="mt-16 border-t border-white/10">
-      <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-white/50">
-        © {new Date().getFullYear()} Percepia
+    <footer className="bg-black/40 border-t border-white/10">
+      <div className="max-w-7xl mx-auto px-4 py-6 text-sm text-zinc-400">
+        © {new Date().getFullYear()} Percepia — Rater
       </div>
     </footer>
   );

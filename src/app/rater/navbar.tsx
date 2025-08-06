@@ -1,99 +1,60 @@
-// src/components/Navbar.tsx
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import AuthButton from "@/components/AuthButton";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm text-white/60 hover:text-white">
-    {children}
-  </Link>
-);
+export default function RaterNavBar() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...props}>
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...props}>
-      <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [authed, setAuthed] = useState<boolean | null>(null); // null during initial check
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(getAuth(), (u) => setAuthed(!!u));
-    return unsub;
-  }, []);
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      // Send the user to the home page with ?logout=1.
+      // Your LogoutOnHome component should handle the actual sign-out.
+      router.push('/?logout=1');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-40 bg-black/50 backdrop-blur border-b border-white/10">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="font-black text-xl tracking-tight" aria-label="Percepia">
-          Percepia
-        </Link>
+    <nav className="glass sticky top-0 z-40 border-b border-white/10 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        {/* Left: Brand + nav */}
+        <div className="flex items-center gap-3">
+          <Link href="/rater" className="font-bold text-lg">
+            Percepia • Rater
+          </Link>
 
-        {/* Desktop */}
-        <nav className="hidden md:flex items-center gap-6">
-          {/* Show protected links ONLY when signed in */}
-          {authed ? (
-            <>
-              <NavLink href="/user/request">Ask a Rater</NavLink>
-              <NavLink href="/user/history">History</NavLink>
-              <NavLink href="/user/wallet">Wallet</NavLink>
-            </>
-          ) : null}
-
-          {/* Auth-aware button (Log in / Log out) */}
-          <AuthButton />
-        </nav>
-
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-        >
-          {open ? <CloseIcon /> : <MenuIcon />}
-          <span className="text-sm">{open ? "Close" : "Menu"}</span>
-        </button>
-      </div>
-
-      {/* Mobile sheet */}
-      {open && (
-        <div className="md:hidden border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-4 md:px-6 py-4 grid gap-3">
-            {/* Protected links only when signed in */}
-            {authed ? (
-              <>
-                <Link href="/user/request" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  Ask a Rater
-                </Link>
-                <Link href="/user/history" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  History
-                </Link>
-                <Link href="/user/wallet" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  Wallet
-                </Link>
-              </>
-            ) : null}
-
-            {/* Auth-aware button; also closes the sheet after action */}
-            <AuthButton className="w-full" onAction={() => setOpen(false)} />
-          </div>
+          <Link href="/rater/requests" className="btn-3d glass rounded-full px-3 py-1.5">
+            Requests
+          </Link>
+          <Link href="/rater/history" className="btn-3d glass rounded-full px-3 py-1.5">
+            History
+          </Link>
+          <Link href="/rater/wallet" className="btn-3d glass rounded-full px-3 py-1.5">
+            Wallet
+          </Link>
+          <Link href="/rater/leaderboard" className="btn-3d glass rounded-full px-3 py-1.5">
+            Leaderboard
+          </Link>
         </div>
-      )}
-    </header>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loading}
+            aria-busy={loading}
+            className="btn-3d glass rounded-full px-4 py-2"
+          >
+            {loading ? 'Logging out…' : 'Log out'}
+          </button>
+        </div>
+      </div>
+    </nav>
   );
 }

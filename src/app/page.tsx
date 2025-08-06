@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Container from "@/components/container";
 import LogoutOnHome from "@/components/LogoutOnHome";
 import HeroCTA from "@/components/HeroCTA";
+import InPageNav from "@/components/InPageNav";
 
 const steps = [
   { title: "Sign up", body: "Create an account and set privacy preferences." },
@@ -21,7 +22,10 @@ const reviews = [
 
 export default function HomePage() {
   return (
-    <main className="route">
+    <main className="route scroll-smooth">
+      {/* Fixed in-page nav */}
+      <InPageNav />
+
       {/* Handles ?logout=1 → signs out and cleans URL */}
       <Suspense fallback={null}>
         <LogoutOnHome />
@@ -45,7 +49,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="py-16">
+      <section id="how-it-works" className="py-16 scroll-mt-24">
         <Container>
           <h2 className="text-3xl font-black mb-8 !text-[#8CFF63] [text-shadow:0_0_8px_rgba(140,255,99,0.45),0_0_1px_rgba(140,255,99,0.7)]">
             How it works
@@ -62,7 +66,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Percepia */}
-      <section className="py-16 border-t border-white/10">
+      <section id="why-percepia" className="py-16 border-t border-white/10 scroll-mt-24">
         <Container>
           <h2 className="text-3xl font-black mb-4 !text-[#8CFF63] [text-shadow:0_0_8px_rgba(140,255,99,0.45),0_0_1px_rgba(140,255,99,0.7)]">
             Why Percepia?
@@ -110,7 +114,7 @@ export default function HomePage() {
       </section>
 
       {/* What people say */}
-      <section className="py-16">
+      <section id="reviews" className="py-16 scroll-mt-24">
         <Container>
           <h2 className="text-3xl font-black mb-8 !text-[#8CFF63] [text-shadow:0_0_8px_rgba(140,255,99,0.45),0_0_1px_rgba(140,255,99,0.7)]">
             What people say

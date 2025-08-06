@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -30,7 +29,7 @@ function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [authed, setAuthed] = useState<boolean | null>(null); // null during initial check
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(getAuth(), (u) => setAuthed(!!u));
@@ -52,6 +51,9 @@ export default function Navbar() {
               <NavLink href="/user/request">Ask a Rater</NavLink>
               <NavLink href="/user/history">History</NavLink>
               <NavLink href="/user/wallet">Wallet</NavLink>
+              <Link href="/user/leaderboard" className="btn-3d glass rounded-full px-3 py-1.5">
+                Leaderboard
+              </Link>
             </>
           ) : null}
 
@@ -85,6 +87,9 @@ export default function Navbar() {
                 </Link>
                 <Link href="/user/wallet" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
                   Wallet
+                </Link>
+                <Link href="/user/leaderboard" className="btn-3d glass rounded-full px-3 py-1.5" onClick={() => setOpen(false)}>
+                  Leaderboard
                 </Link>
               </>
             ) : null}

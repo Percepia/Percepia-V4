@@ -1,4 +1,4 @@
-// src/app/rater/leaderboard/page.tsx
+// src/app/user/leaderboard/page.tsx
 import Link from "next/link";
 
 type Rater = {
@@ -27,7 +27,7 @@ export default function Page() {
     <section className="py-10 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-black">Leaderboard</h1>
-        <Link href="/rater" className="btn-3d glass rounded-full px-4 py-2">
+        <Link href="/user" className="btn-3d glass rounded-full px-4 py-2">
           Back
         </Link>
       </div>
