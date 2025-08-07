@@ -1,104 +1,72 @@
+// src/app/user/navbar.tsx  (rename path if needed)
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import clsx from "clsx";              // already installed for rater; if not: npm i clsx
 import AuthButton from "@/components/AuthButton";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm text-white/60 hover:text-white">
-    {children}
-  </Link>
-);
+const NAV = [
+  { href: "/user/request", label: "Ask a Rater", badge: 1 }, // demo counter
+  { href: "/user/history", label: "History" },
+  { href: "/user/wallet",  label: "Wallet" },
+  { href: "/user/leaderboard", label: "Leaderboard" },
+];
 
-function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...props}>
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
+export default function UserNavBar() {
+  const pathname = usePathname();
+  const router   = useRouter();
+  const [loading, setLoading] = useState(false);
 
-function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...props}>
-      <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [authed, setAuthed] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(getAuth(), (u) => setAuthed(!!u));
-    return unsub;
-  }, []);
+  const handleLogout = async () => {
+    setLoading(true);
+    router.push("/?logout=1");
+  };
 
   return (
-    <header className="sticky top-0 z-40 bg-black/50 backdrop-blur border-b border-white/10">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="font-black text-xl tracking-tight" aria-label="Percepia">
-          Percepia
+    <nav className="glass sticky top-0 z-40 border-b border-white/10 backdrop-blur-md shadow-[0_1px_6px_rgba(0,0,0,0.4)]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
+        {/* Brand */}
+        <Link href="/user" className="font-bold text-lg whitespace-nowrap">
+          <span className="text-[#46A2FF]">Percepia</span> • User
         </Link>
 
-        {/* Desktop */}
-        <nav className="hidden md:flex items-center gap-6">
-          {/* Show protected links ONLY when signed in */}
-          {authed ? (
-            <>
-              <NavLink href="/user/request">Ask a Rater</NavLink>
-              <NavLink href="/user/history">History</NavLink>
-              <NavLink href="/user/wallet">Wallet</NavLink>
-              <Link href="/user/leaderboard" className="btn-3d glass rounded-full px-3 py-1.5">
-                Leaderboard
+        {/* Nav pills */}
+        <div className="flex items-center gap-2">
+          {NAV.map(({ href, label, badge }) => {
+            const active = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={clsx(
+                  "btn-3d glass rounded-full px-3 py-1.5 transition",
+                  active && "bg-white/10 border border-white/20"
+                )}
+              >
+                {label}
+                {badge !== undefined && (
+                  <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#46A2FF]/90 px-1 text-xs font-semibold text-black">
+                    {badge}
+                  </span>
+                )}
               </Link>
-            </>
-          ) : null}
+            );
+          })}
+        </div>
 
-          {/* Auth-aware button (Log in / Log out) */}
-          <AuthButton />
-        </nav>
-
-        {/* Mobile toggle */}
+        {/* Log-out */}
         <button
-          className="md:hidden inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
+          type="button"
+          onClick={handleLogout}
+          disabled={loading}
+          aria-busy={loading}
+          className="rounded-full border border-red-400/50 bg-transparent px-4 py-2 text-red-300 hover:bg-red-400/10 focus:outline-none focus:ring-2 focus:ring-red-400/40"
         >
-          {open ? <CloseIcon /> : <MenuIcon />}
-          <span className="text-sm">{open ? "Close" : "Menu"}</span>
+          {loading ? "Logging out…" : "Log out"}
         </button>
       </div>
-
-      {/* Mobile sheet */}
-      {open && (
-        <div className="md:hidden border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-4 md:px-6 py-4 grid gap-3">
-            {/* Protected links only when signed in */}
-            {authed ? (
-              <>
-                <Link href="/user/request" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  Ask a Rater
-                </Link>
-                <Link href="/user/history" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  History
-                </Link>
-                <Link href="/user/wallet" className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-white" onClick={() => setOpen(false)}>
-                  Wallet
-                </Link>
-                <Link href="/user/leaderboard" className="btn-3d glass rounded-full px-3 py-1.5" onClick={() => setOpen(false)}>
-                  Leaderboard
-                </Link>
-              </>
-            ) : null}
-
-            {/* Auth-aware button; also closes the sheet after action */}
-            <AuthButton className="w-full" onAction={() => setOpen(false)} />
-          </div>
-        </div>
-      )}
-    </header>
+    </nav>
   );
 }
