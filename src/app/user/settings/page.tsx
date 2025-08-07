@@ -1,9 +1,9 @@
 "use client";
 import Container from "@/components/container";
 
-const ACCENT = "#8CFF63";
+const ACCENT = "#46A2FF";
 
-export default function RaterSettingsPage() {
+export default function UserSettingsPage() {
   return (
     <main className="route" style={{ "--accent": ACCENT } as React.CSSProperties}>
       <section className="py-12">
