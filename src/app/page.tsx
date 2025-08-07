@@ -5,6 +5,8 @@ import Container from "@/components/container";
 import LogoutOnHome from "@/components/LogoutOnHome";
 import HeroCTA from "@/components/HeroCTA";
 import InPageNav from "@/components/InPageNav";
+import Footer from "@/components/Footer";
+
 
 const steps = [
   { title: "Sign up", body: "Create an account and set privacy preferences." },
@@ -129,6 +131,8 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
+      {/* Home-page footer */}
+     <Footer />
     </main>
   );
 }
