@@ -1,42 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Container from "@/components/container";
 import { auth } from "@/lib/firebase";
-import {
-  watchWallet,
-  watchTransactions,
-  type WalletDoc,
-  type Txn,
-} from "@/lib/services/wallet";
-import Link from "next/link";
+import { watchWallet, type WalletSnapshot } from "@/lib/services/wallet";
 
-const ACCENT = "#46A2FF";
+const ACCENT = "#46A2FF"; // user blue
 
-function fmt(ts?: any) {
-  try {
-    return ts?.toDate ? ts.toDate().toLocaleString() : "—";
-  } catch {
-    return "—";
-  }
+function Amount({ v }: { v: number }) {
+  const s = new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 }).format(
+    Math.abs(v || 0)
+  );
+  return <span className={v >= 0 ? "text-emerald-300" : "text-rose-300"}>{v >= 0 ? "+" : "-"}{s}</span>;
 }
 
 export default function WalletPage() {
-  const [uid, setUid] = useState<string | null>(null);
-  const [wallet, setWallet] = useState<WalletDoc | null>(null);
-  const [txns, setTxns] = useState<Txn[]>([]);
+  const [data, setData] = useState<WalletSnapshot>({ balance: 0, items: [] });
 
   useEffect(() => {
     const u = auth.currentUser;
-    setUid(u?.uid ?? null);
     if (!u) return;
-    const stopW = watchWallet(u.uid, setWallet);
-    const stopT = watchTransactions(u.uid, setTxns);
-    return () => {
-      stopW?.();
-      stopT?.();
-    };
+    const stop = watchWallet(u.uid, setData);
+    return stop;
   }, []);
+
+  const balanceStr = new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 })
+    .format(data.balance || 0);
 
   return (
     <main className="route" style={{ "--accent": ACCENT } as React.CSSProperties}>
@@ -48,7 +38,7 @@ export default function WalletPage() {
           <div className="grid lg:grid-cols-2 gap-6 mt-8">
             <div className="card p-6">
               <div className="text-sm text-zinc-400">Current Balance</div>
-              <div className="text-4xl font-black mt-2">{wallet?.balance ?? 0}</div>
+              <div className="text-4xl font-black mt-2">{balanceStr}</div>
               <div className="mt-4 flex gap-3">
                 <Link href="/user/wallet/buy" className="btn-3d btn-primary-3d bg-[--accent] text-black px-5 py-2 rounded-full">
                   Buy Coins
@@ -61,19 +51,23 @@ export default function WalletPage() {
 
             <div className="card p-6">
               <div className="font-semibold">Recent Activity</div>
-              <ul className="mt-4 space-y-3 text-sm">
-                {txns.length === 0 && <li className="text-zinc-400">No transactions yet.</li>}
-                {txns.map((t) => (
-                  <li key={t.id} className="flex items-center justify-between">
-                    <span className="truncate">{t.note || (t.type === "credit" ? "Credit" : "Debit")}</span>
-                    <span className={t.type === "credit" ? "text-green-300" : "text-red-300"}>
-                      {t.type === "credit" ? "+" : "-"}
-                      {t.amount}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 text-xs text-zinc-500">Updated: {fmt(wallet?.updatedAt)}</div>
+              {data.items.length === 0 ? (
+                <div className="text-sm text-zinc-500 mt-4">No transactions yet.</div>
+              ) : (
+                <ul className="mt-4 space-y-3 text-sm">
+                  {data.items.map(({ id, data: tx }) => (
+                    <li key={id} className="flex justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="truncate">{tx.note || tx.type || "Transaction"}</div>
+                        <div className="text-zinc-500">
+                          {tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleString() : "—"}
+                        </div>
+                      </div>
+                      <Amount v={Number(tx.amount) || 0} />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </Container>

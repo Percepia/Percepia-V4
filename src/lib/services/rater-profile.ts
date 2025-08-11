@@ -4,6 +4,10 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export type RaterProfile = {
   name?: string;
+  dob?: string;                         // for onboarding check
+  pronouns?: string;                    // ✅ added
+  interests?: string[] | string;        // ✅ added
+  role?: "user" | "rater";              // ✅ added
   specialty?: string;
   bio?: string;
   avatarUrl?: string;
@@ -33,7 +37,7 @@ export async function uploadRaterAvatar(uid: string, file: File) {
   const obj = ref(storage, path);
   await uploadBytes(obj, file, {
     contentType: file.type,
-    cacheControl: "public, max-age=31536000, immutable"
+    cacheControl: "public, max-age=31536000, immutable",
   });
   const url = await getDownloadURL(obj);
   await saveRaterProfile(uid, { avatarUrl: url, avatarPath: path });
