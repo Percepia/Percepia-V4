@@ -4,12 +4,19 @@ import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export type Profile = {
+  // existing
   name?: string;
   email?: string;
   bio?: string;
   avatarUrl?: string;
-  specialty?: string;         // rater only
+  specialty?: string;            // rater-only (optional)
   role?: "user" | "rater";
+
+  // ⬇️ new fields used by onboarding
+  onboarded?: boolean;
+  dob?: string;                  // ISO date "YYYY-MM-DD"
+  interests?: string[];
+  pronouns?: string;
 };
 
 /** Realtime listener; returns unsubscribe */
@@ -24,7 +31,7 @@ export async function saveProfile(uid: string, data: Partial<Profile>) {
   await setDoc(d, data, { merge: true });
 }
 
-/** Upload avatar under a namespaced path (users|raters) and return public URL */
+/** Upload avatar and return public URL */
 export async function uploadAvatar(uid: string, file: File, who: "users" | "raters"): Promise<string> {
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const key = `avatars/${who}/${uid}/avatar-${Date.now()}.${ext}`;

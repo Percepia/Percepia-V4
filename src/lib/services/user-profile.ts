@@ -1,12 +1,11 @@
-// src/lib/services/user-profile.ts
-import type { Profile } from "./profile-core";
-import { watchProfile, saveProfile, uploadAvatar } from "./profile-core";
+// src/lib/services/rater-profile.ts
+import { watchProfile, saveProfile, uploadAvatar, type Profile } from "./profile-core";
 
-export type UserProfile = Profile & { role?: "user" };
+export type RaterProfile = Profile & { specialty?: string; role?: "rater" };
 
-export const watchUserProfile = watchProfile;
-export const saveUserProfile = (uid: string, data: Partial<UserProfile>) =>
-  saveProfile(uid, { ...data, role: "user" });
+export const watchRaterProfile = watchProfile;
+export const saveRaterProfile = (uid: string, data: Partial<RaterProfile>) =>
+  saveProfile(uid, { ...data, role: "rater" });
 
-export const uploadUserAvatar = (uid: string, file: File) =>
-  uploadAvatar(uid, file, "users");
+export const uploadRaterAvatar = (uid: string, file: File) =>
+  uploadAvatar(uid, file, "raters");
