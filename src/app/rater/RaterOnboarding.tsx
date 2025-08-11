@@ -4,13 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import {
-  watchRaterProfile,
-  saveRaterProfile,
-  type RaterProfile,
-} from "@/lib/services/rater-profile";
-
-export default function RaterOnboarding() {
+import { watchRaterProfile, saveRaterProfile, type RaterProfile } from "@/lib/services/rater-profile";
+  export default function RaterOnboarding() {
   const router = useRouter();
   const ACCENT = "#8CFF63";
 

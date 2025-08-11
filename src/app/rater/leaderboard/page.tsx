@@ -1,56 +1,81 @@
-// src/app/rater/leaderboard/page.tsx
-import Link from "next/link";
+"use client";
 
-type Rater = {
-  name: string;
-  country: string;
-  rating: number;
-  price: number;
-  slug: string;
-};
+import { useEffect, useState } from "react";
+import Container from "@/components/container";
+import { watchTopRaters, type LeaderboardRater } from "@/lib/services/leaderboard";
 
-const raters: Rater[] = [
-  { name: "Aarav Sharma", country: "IN", rating: 4.6, price: 9, slug: "aarav-sharma" },
-  { name: "Camille Dubois", country: "FR", rating: 4.7, price: 10, slug: "camille-dubois" },
-  { name: "Diego Ramirez", country: "MX", rating: 4.8, price: 11, slug: "diego-ramirez" },
-  { name: "Yuki Kobayashi", country: "JP", rating: 4.9, price: 12, slug: "yuki-kobayashi" },
-  { name: "Layla Al-Farsi", country: "AE", rating: 4.7, price: 9, slug: "layla-al-farsi" },
-  { name: "Noah Williams", country: "US", rating: 4.8, price: 10, slug: "noah-williams" },
-  { name: "Zanele Mbeki", country: "ZA", rating: 4.9, price: 12, slug: "zanele-mbeki" },
-  { name: "Fatima Zahra", country: "MA", rating: 4.7, price: 10, slug: "fatima-zahra" },
-  { name: "Hans Müller", country: "DE", rating: 4.8, price: 11, slug: "hans-muller" },
-  { name: "Sofia Rossi", country: "IT", rating: 4.9, price: 12, slug: "sofia-rossi" },
-];
+const ACCENT = "#8CFF63"; // rater green
 
-export default function Page() {
+export default function RaterLeaderboardPage() {
+  const [rows, setRows] = useState<LeaderboardRater[] | null>(null);
+
+  useEffect(() => {
+    const stop = watchTopRaters(setRows, { limit: 50, order: "ratingCount" });
+    return stop;
+  }, []);
+
   return (
-    <section className="py-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black">Leaderboard</h1>
-        <Link href="/rater" className="btn-3d glass rounded-full px-4 py-2">
-          Back
-        </Link>
-      </div>
+    <main className="route theme-rater" style={{ "--accent": ACCENT } as React.CSSProperties}>
+      <section className="py-12">
+        <Container>
+          <h1 className="text-3xl font-black">Leaderboard</h1>
+          <p className="mt-2 text-zinc-300">Top raters by total ratings.</p>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {raters.map((r) => (
-          <div key={r.slug} className="card hover:shadow-neon transition-shadow">
-            <div className="font-bold">
-              {r.name}{" "}
-              <span className="text-xs text-zinc-400">({r.country})</span>
+          {!rows && (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="card p-4 animate-pulse">
+                  <div className="h-16 w-16 rounded-full bg-white/10" />
+                  <div className="mt-3 h-4 w-1/2 bg-white/10 rounded" />
+                  <div className="mt-2 h-3 w-1/3 bg.white/10 rounded" />
+                </div>
+              ))}
             </div>
-            <div className="text-sm text-zinc-400">
-              Rating {r.rating} • {r.price} coins
+          )}
+
+          {rows && (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
+              {rows.map((r, i) => (
+                <div key={r.uid} className="card p-5 flex items-center gap-4">
+                  <div className="relative">
+                    <img
+                      src={r.avatarUrl || "/avatar-placeholder.png"}
+                      alt={r.displayName}
+                      className="h-16 w-16 rounded-full object-cover border border-white/10"
+                    />
+                    <span className="absolute -top-2 -left-2 grid h-6 w-6 place-items-center rounded-full bg-[--accent] text-black text-xs font-bold">
+                      {i + 1}
+                    </span>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="truncate font-semibold">{r.displayName}</div>
+                      {typeof r.avgRating === "number" && r.avgRating > 0 && (
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-xs">
+                          ⭐ {r.avgRating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-zinc-400 truncate">{r.specialty || "—"}</div>
+
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="rounded-full border border-white/10 px-2 py-0.5">
+                        {r.ratingCount ?? 0} ratings
+                      </span>
+                      {typeof r.earningsAED === "number" && r.earningsAED > 0 && (
+                        <span className="rounded-full border border-white/10 px-2 py-0.5">
+                          AED {Math.round(r.earningsAED)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <Link
-              href={`/rater/${r.slug}`}
-              className="btn-3d glass mt-3 inline-block rounded-full px-4 py-2"
-            >
-              View profile
-            </Link>
-          </div>
-        ))}
-      </div>
-    </section>
+          )}
+        </Container>
+      </section>
+    </main>
   );
 }

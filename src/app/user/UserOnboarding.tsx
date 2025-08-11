@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import {
-  watchUserProfile,
-  saveUserProfile,
-  type UserProfile,
-} from "@/lib/services/user-profile";
+import { watchUserProfile, saveUserProfile, type UserProfile } from "@/lib/services/user-profile";
 
 export default function UserOnboarding() {
   const router = useRouter();

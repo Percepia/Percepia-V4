@@ -2,148 +2,145 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Container from "@/components/container";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import {
-  watchUserProfile,
   saveUserProfile,
   uploadUserAvatar,
+  watchUserProfile,
   type UserProfile,
 } from "@/lib/services/user-profile";
 
-const ACCENT = "#46A2FF"; // blue
+const ACCENT = "#46A2FF";
 
 export default function UserProfilePage() {
   const [uid, setUid] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");   // editable for now
-  const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  const [file, setFile] = useState<File | null>(null);
-  const filePreview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  const [dob, setDob] = useState("");
+  const [pronouns, setPronouns] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUid(u?.uid ?? null);
-      setEmail(u?.email ?? "");
+    const u = auth.currentUser;
+    setUid(u?.uid ?? null);
+    if (!u) return;
+    const stop = watchUserProfile(u.uid, (p) => {
+      setProfile(p);
+      setName(p?.name || "");
+      setDob(p?.dob || "");
+      setPronouns(p?.pronouns || "");
     });
-    return unsub;
+    return stop;
   }, []);
 
-  useEffect(() => {
-    if (!uid) {
-      setLoading(false);
-      return;
-    }
-    const unsub = watchUserProfile(uid, (p: UserProfile | null) => {
-      setName(p?.name ?? "");
-      setBio(p?.bio ?? "");
-      setAvatarUrl(p?.avatarUrl ?? null);
-      setLoading(false);
-    });
-    return unsub;
-  }, [uid]);
-
-  useEffect(() => () => filePreview && URL.revokeObjectURL(filePreview), [filePreview]);
-
-  async function onSave() {
-    if (!uid) return;
-    setLoading(true);
+  async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f || !uid) return;
     try {
-      let url = avatarUrl ?? undefined;
-      if (file) {
-        url = await uploadUserAvatar(uid, file);
-        setFile(null);
-      }
-      await saveUserProfile(uid, { name, email, bio, avatarUrl: url });
+      setBusy(true);
+      await uploadUserAvatar(uid, f);
+      setMsg("Profile picture updated.");
+    } catch (e: any) {
+      setMsg(e?.message || "Upload failed.");
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
-  if (!uid) {
-    return (
-      <main className="route">
-        <section className="py-12">
-          <Container>
-            <h1 className="text-3xl font-black">Your Profile</h1>
-            <p className="mt-2 text-zinc-300">Please sign in to view your profile.</p>
-          </Container>
-        </section>
-      </main>
-    );
+  async function onSave() {
+    if (!uid) return;
+    try {
+      setBusy(true);
+      await saveUserProfile(uid, {
+        name: name.trim(),
+        dob: dob.trim(),
+        pronouns: pronouns.trim(),
+      });
+      setMsg("Profile saved.");
+    } catch (e: any) {
+      setMsg(e?.message || "Save failed.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <main className="route" style={{ "--accent": ACCENT } as React.CSSProperties}>
       <section className="py-12">
         <Container>
-          <h1 className="text-3xl font-black">Your Profile</h1>
-          <p className="mt-2 text-zinc-300">Manage your details below.</p>
+          <h1 className="text-3xl font-black">Your profile</h1>
+          <p className="text-zinc-300 mt-2">Update your picture and details.</p>
 
-          <div className="card mt-8 grid max-w-xl gap-6 p-6">
-            {/* Avatar + uploader (UI unchanged) */}
-            <div className="flex items-center gap-5">
-              <div className="h-24 w-24 rounded-full border border-white/20 bg-white/5 overflow-hidden grid place-items-center">
-                {filePreview ? (
-                  <img src={filePreview} alt="Preview" className="h-full w-full object-cover" />
-                ) : avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <svg width="40" height="40" viewBox="0 0 24 24" stroke="white" strokeWidth="1.8" fill="none">
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c1.5-4 14.5-4 16 0" />
-                  </svg>
-                )}
-              </div>
+          {msg && (
+            <div className="mt-4 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm">
+              {msg}
+            </div>
+          )}
 
-              <div>
+          <div className="card mt-6 p-6 grid gap-6 md:grid-cols-[160px_1fr]">
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-3">
+              <img
+                src={profile?.avatarUrl || "/avatar-placeholder.png"}
+                alt="avatar"
+                className="h-36 w-36 rounded-full object-cover border border-white/10"
+              />
+              <label className="btn-3d btn-primary-3d bg-[--accent] text-black rounded-full px-4 py-2 cursor-pointer">
+                Change photo
                 <input
-                  id="avatar"
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={onPickAvatar}
+                  disabled={busy}
                 />
-                <label
-                  htmlFor="avatar"
-                  className="btn-3d btn-primary-3d cursor-pointer rounded-full bg-[--accent] px-4 py-2 text-sm font-semibold text-black"
-                >
-                  {file ? "Change photo" : avatarUrl ? "Change photo" : "Upload photo"}
-                </label>
-              </div>
+              </label>
             </div>
 
-            <label>
-              <span className="mb-1 block text-sm text-zinc-400">Name</span>
-              <input className="input w-full" value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
+            {/* Details */}
+            <div className="grid gap-4">
+              <label>
+                <div className="text-sm text-zinc-400 mb-1">Name</div>
+                <input
+                  className="input"
+                  placeholder="How should we call you?"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={busy}
+                />
+              </label>
+              <label>
+                <div className="text-sm text-zinc-400 mb-1">Date of birth</div>
+                <input
+                  type="date"
+                  className="input"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  disabled={busy}
+                />
+              </label>
+              <label>
+                <div className="text-sm text-zinc-400 mb-1">Pronouns (optional)</div>
+                <input
+                  className="input"
+                  placeholder="she/her, he/him, they/them…"
+                  value={pronouns}
+                  onChange={(e) => setPronouns(e.target.value)}
+                  disabled={busy}
+                />
+              </label>
 
-            <label>
-              <span className="mb-1 block text-sm text-zinc-400">Email</span>
-              <input className="input w-full" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
-
-            <label>
-              <span className="mb-1 block text-sm text-zinc-400">Bio</span>
-              <textarea
-                className="input w-full min-h-[100px]"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Short bio..."
-              />
-            </label>
-
-            <button
-              onClick={onSave}
-              disabled={loading}
-              className="btn-3d btn-primary-3d w-fit rounded-full bg-[--accent] px-6 py-2 text-black"
-            >
-              {loading ? "Saving…" : "Save Changes"}
-            </button>
+              <div className="pt-2">
+                <button
+                  onClick={onSave}
+                  disabled={busy}
+                  className="btn-3d btn-primary-3d bg-[--accent] text-black rounded-full px-6 py-2"
+                >
+                  {busy ? "Saving…" : "Save changes"}
+                </button>
+              </div>
+            </div>
           </div>
         </Container>
       </section>

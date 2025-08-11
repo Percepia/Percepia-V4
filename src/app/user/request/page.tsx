@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import Container from "@/components/container";
+import { saveNewUserRequest } from "@/lib/services/user-requests";
 
 type Step = 1 | 2 | 3 | 4;
 type AssignMode = "auto" | "pick";
@@ -35,6 +36,14 @@ export default function RequestWizardPage() {
 
   const [coins, setCoins] = useState<number>(20);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // clean up object URL on unmount
+    return () => {
+      if (fileUrl) URL.revokeObjectURL(fileUrl);
+    };
+  }, [fileUrl]);
 
   const resetError = () => setError("");
   const clampStep = (n: number): Step => (n < 1 ? 1 : n > 4 ? 4 : (n as Step));
@@ -80,12 +89,28 @@ export default function RequestWizardPage() {
     step > 1 ? setStep((s) => clampStep(s - 1)) : router.back();
   }
 
-  function submit() {
+  async function submit() {
     resetError();
     if (!file) return setError("No file selected.");
     if (!title || title.trim().length < 3) return setError("Provide a valid title.");
     if (assignMode === "pick" && !chosenRater) return setError("Pick a rater.");
-    router.push("/user/history" as Route);
+
+    try {
+      setSubmitting(true);
+      await saveNewUserRequest({
+        title,
+        notes,
+        assignMode,
+        chosenRater,
+        coins,
+        file,
+      });
+      router.push("/user/history" as Route);
+    } catch (e: any) {
+      setError(e?.message || "Something went wrong while saving your request.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -140,6 +165,7 @@ export default function RequestWizardPage() {
                       type="button"
                       onClick={clearFile}
                       className="btn-3d px-4 py-2 rounded-full border border-white/10"
+                      disabled={submitting}
                     >
                       Remove
                     </button>
@@ -292,6 +318,7 @@ export default function RequestWizardPage() {
               type="button"
               onClick={prevStep}
               className="btn-3d rounded-full border border-white/10 px-5 py-2"
+              disabled={submitting}
             >
               Back
             </button>
@@ -301,6 +328,7 @@ export default function RequestWizardPage() {
                 type="button"
                 onClick={nextStep}
                 className="btn-3d btn-primary-3d rounded-full bg-[--accent] px-6 py-2 text-black"
+                disabled={submitting}
               >
                 Next
               </button>
@@ -309,8 +337,9 @@ export default function RequestWizardPage() {
                 type="button"
                 onClick={submit}
                 className="btn-3d btn-primary-3d rounded-full bg-[--accent] px-6 py-2 text-black"
+                disabled={submitting}
               >
-                Submit
+                {submitting ? "Submitting…" : "Submit"}
               </button>
             )}
           </div>
