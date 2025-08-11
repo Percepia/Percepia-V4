@@ -1,17 +1,36 @@
 ﻿# Dependencies
-node_modules
+node_modules/
+
 # Next.js
-.next
-out
+.next/
+out/
+
+# Optional caches
+.turbo/
+.swc/
+
 # Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-# Env
+
+# Env files (but keep an example in git)
+.env
 .env.local
+.env.*.local
 .env.*
-# OS
+!.env.example
+
+# OS / editors
 .DS_Store
 Thumbs.db
-.vercel
+.idea/
+.vscode/
+
+# Vercel
+.vercel/
+
+# (If you use Firebase emulators later)
+.firebase/
