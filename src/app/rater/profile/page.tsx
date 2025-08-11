@@ -23,7 +23,7 @@ export default function RaterProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
-  const filePreview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  const filePreview = useMemo<string | null>(() => (file ? URL.createObjectURL(file) : null), [file]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null));
@@ -45,7 +45,13 @@ export default function RaterProfilePage() {
     return unsub;
   }, [uid]);
 
-  useEffect(() => () => filePreview && URL.revokeObjectURL(filePreview), [filePreview]);
+  // ✅ Proper cleanup: always returns a function (or undefined), never ""/null
+  useEffect(() => {
+    if (!filePreview) return;
+    return () => {
+      URL.revokeObjectURL(filePreview);
+    };
+  }, [filePreview]);
 
   async function onSave() {
     if (!uid) return;
