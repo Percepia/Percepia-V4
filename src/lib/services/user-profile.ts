@@ -5,8 +5,10 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export type UserProfile = {
   name?: string;
-  dob?: string;               // ISO string or "YYYY-MM-DD"
+  dob?: string;                 // ISO or YYYY-MM-DD
   pronouns?: string;
+  interests?: string[] | string; // ✅ added (supports array or single string)
+  role?: "user" | "rater";       // ✅ added
   avatarUrl?: string;
   avatarPath?: string;
   onboarded?: boolean;
@@ -40,7 +42,6 @@ export async function uploadUserAvatar(uid: string, file: File) {
   await uploadBytes(obj, file, { contentType: file.type });
   const url = await getDownloadURL(obj);
 
-  // persist on profile
   await saveUserProfile(uid, { avatarUrl: url, avatarPath: path });
   return { url, path };
 }
