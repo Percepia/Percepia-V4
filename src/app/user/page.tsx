@@ -6,6 +6,7 @@ import Container from "@/components/container";
 import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { watchUserProfile, type UserProfile } from "@/lib/services/user-profile";
+import Image from "next/image";
 
 export default function UserDashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -21,14 +22,18 @@ export default function UserDashboard() {
     <main className="route">
       <section className="py-12">
         <Container>
-          <div className="flex items-center gap-4 mb-6">
+          <div className="mb-6 flex items-center gap-4">
             <h1 className="text-3xl font-black">Your dashboard</h1>
-            {/* Avatar preview (shows after upload) */}
-            <img
-              src={profile?.avatarUrl || "/avatar-placeholder.png"}
-              alt="avatar"
-              className="h-10 w-10 rounded-full object-cover border border-white/10"
-            />
+            <div className="h-10 w-10 overflow-hidden rounded-full border border-white/10">
+              <Image
+                src={profile?.avatarUrl || "/avatar-placeholder.png"}
+                alt="avatar"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full object-cover"
+                priority
+              />
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -39,9 +44,7 @@ export default function UserDashboard() {
 
             <Link href={"/user/history" as Route} className="card p-6 hover:border-white/30">
               <div className="text-lg font-semibold">History</div>
-              <p className="text-sm text-zinc-400 mt-1">
-                View your past requests & feedback.
-              </p>
+              <p className="text-sm text-zinc-400 mt-1">View your past requests & feedback.</p>
             </Link>
 
             <Link href={"/user/wallet" as Route} className="card p-6 hover:border-white/30">

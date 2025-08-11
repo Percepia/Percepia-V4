@@ -10,6 +10,7 @@ import {
   uploadRaterAvatar,
   type RaterProfile,
 } from "@/lib/services/rater-profile";
+import Image from "next/image";
 
 const ACCENT = "#8CFF63"; // green
 
@@ -45,12 +46,9 @@ export default function RaterProfilePage() {
     return unsub;
   }, [uid]);
 
-  // ✅ Proper cleanup: always returns a function (or undefined), never ""/null
   useEffect(() => {
     if (!filePreview) return;
-    return () => {
-      URL.revokeObjectURL(filePreview);
-    };
+    return () => URL.revokeObjectURL(filePreview);
   }, [filePreview]);
 
   async function onSave() {
@@ -62,12 +60,7 @@ export default function RaterProfilePage() {
         url = await uploadRaterAvatar(uid, file);
         setFile(null);
       }
-      await saveRaterProfile(uid, {
-        name: displayName,
-        specialty,
-        bio,
-        avatarUrl: url,
-      });
+      await saveRaterProfile(uid, { name: displayName, specialty, bio, avatarUrl: url });
     } finally {
       setLoading(false);
     }
@@ -95,11 +88,18 @@ export default function RaterProfilePage() {
 
           <div className="card mt-8 grid max-w-xl gap-6 p-6">
             <div className="flex items-center gap-5">
-              <div className="h-24 w-24 rounded-full border border-white/20 bg-white/5 overflow-hidden grid place-items-center">
+              <div className="h-24 w-24 rounded-full overflow-hidden border border-white/20 bg-white/5 grid place-items-center">
                 {filePreview ? (
                   <img src={filePreview} alt="Preview" className="h-full w-full object-cover" />
                 ) : avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                  <Image
+                    src={avatarUrl}
+                    alt="Avatar"
+                    width={96}
+                    height={96}
+                    className="h-24 w-24 rounded-full object-cover"
+                    priority
+                  />
                 ) : (
                   <svg width="40" height="40" viewBox="0 0 24 24" stroke="white" strokeWidth="1.8" fill="none">
                     <circle cx="12" cy="8" r="4" />
@@ -109,17 +109,8 @@ export default function RaterProfilePage() {
               </div>
 
               <div>
-                <input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-                <label
-                  htmlFor="avatar"
-                  className="btn-3d btn-primary-3d cursor-pointer rounded-full bg-[--accent] px-4 py-2 text-sm font-semibold text-black"
-                >
+                <input id="avatar" type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                <label htmlFor="avatar" className="btn-3d btn-primary-3d cursor-pointer rounded-full bg-[--accent] px-4 py-2 text-sm font-semibold text-black">
                   {file ? "Change photo" : avatarUrl ? "Change photo" : "Upload photo"}
                 </label>
               </div>
@@ -132,29 +123,15 @@ export default function RaterProfilePage() {
 
             <label>
               <span className="mb-1 block text-sm text-zinc-400">Specialty</span>
-              <input
-                className="input w-full"
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                placeholder="Style, Hair & Makeup…"
-              />
+              <input className="input w-full" value={specialty} onChange={(e) => setSpecialty(e.target.value)} placeholder="Style, Hair & Makeup…" />
             </label>
 
             <label>
               <span className="mb-1 block text-sm text-zinc-400">Bio</span>
-              <textarea
-                className="input w-full min-h-[100px]"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell users about yourself..."
-              />
+              <textarea className="input w-full min-h-[100px]" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell users about yourself..." />
             </label>
 
-            <button
-              onClick={onSave}
-              disabled={loading}
-              className="btn-3d btn-primary-3d w-fit rounded-full bg-[--accent] px-6 py-2 text-black"
-            >
+            <button onClick={onSave} disabled={loading} className="btn-3d btn-primary-3d w-fit rounded-full bg-[--accent] px-6 py-2 text-black">
               {loading ? "Saving…" : "Save Changes"}
             </button>
           </div>

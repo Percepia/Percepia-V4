@@ -1,14 +1,41 @@
-// src/lib/services/rater-profile.ts
-import { watchProfile, saveProfile, uploadAvatar, type Profile } from "./profile-core";
+import { db, storage } from "@/lib/firebase";
+import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-export type RaterProfile = Profile & { specialty?: string; role?: "rater" };
+export type RaterProfile = {
+  name?: string;
+  specialty?: string;
+  bio?: string;
+  avatarUrl?: string;
+  avatarPath?: string;
+  onboarded?: boolean;
+  updatedAt?: any;
+  createdAt?: any;
+};
 
-// Re-exported helpers with rater role
-export const watchRaterProfile = (uid: string, cb: (p: RaterProfile | null) => void) =>
-  watchProfile(uid, cb as any);
+export function watchRaterProfile(uid: string, cb: (p: RaterProfile | null) => void) {
+  const dref = doc(db, "users", uid);
+  return onSnapshot(dref, (snap) => cb(snap.exists() ? (snap.data() as RaterProfile) : null));
+}
 
-export const saveRaterProfile = (uid: string, data: Partial<RaterProfile>) =>
-  saveProfile(uid, { ...data, role: "rater" });
+export async function saveRaterProfile(uid: string, data: Partial<RaterProfile>) {
+  const dref = doc(db, "users", uid);
+  await setDoc(
+    dref,
+    { ...data, updatedAt: serverTimestamp(), createdAt: serverTimestamp() },
+    { merge: true }
+  );
+}
 
-export const uploadRaterAvatar = (uid: string, file: File) =>
-  uploadAvatar(uid, file, "raters");
+export async function uploadRaterAvatar(uid: string, file: File) {
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const path = `avatars/users/${uid}/${Date.now()}.${ext}`;
+  const obj = ref(storage, path);
+  await uploadBytes(obj, file, {
+    contentType: file.type,
+    cacheControl: "public, max-age=31536000, immutable"
+  });
+  const url = await getDownloadURL(obj);
+  await saveRaterProfile(uid, { avatarUrl: url, avatarPath: path });
+  return url;
+}
