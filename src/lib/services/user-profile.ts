@@ -1,11 +1,14 @@
-// src/lib/services/rater-profile.ts
+// src/lib/services/user-profile.ts
 import { watchProfile, saveProfile, uploadAvatar, type Profile } from "./profile-core";
 
-export type RaterProfile = Profile & { specialty?: string; role?: "rater" };
+export type UserProfile = Profile & { role?: "user" };
 
-export const watchRaterProfile = watchProfile;
-export const saveRaterProfile = (uid: string, data: Partial<RaterProfile>) =>
-  saveProfile(uid, { ...data, role: "rater" });
+// Re-exported helpers with user role
+export const watchUserProfile = (uid: string, cb: (p: UserProfile | null) => void) =>
+  watchProfile(uid, cb as any);
 
-export const uploadRaterAvatar = (uid: string, file: File) =>
-  uploadAvatar(uid, file, "raters");
+export const saveUserProfile = (uid: string, data: Partial<UserProfile>) =>
+  saveProfile(uid, { ...data, role: "user" });
+
+export const uploadUserAvatar = (uid: string, file: File) =>
+  uploadAvatar(uid, file, "users");
