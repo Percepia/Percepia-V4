@@ -1,6 +1,8 @@
 // src/app/rater/page.tsx
 import Container from "@/components/container";
 import RaterGuidelinesModal from "@/components/RaterGuidelinesModal";
+// ⬇️ import your onboarding component (adjust the path/name if your file differs)
+import RaterOnboarding from "@/app/rater/RaterOnboarding";
 
 /** small stat tile */
 function Stat({ label, value }: { label: string; value: string }) {
@@ -15,7 +17,11 @@ function Stat({ label, value }: { label: string; value: string }) {
 export default function RaterHomePage() {
   return (
     <main className="route theme-rater">
+      {/* Existing guidelines modal */}
       <RaterGuidelinesModal />
+
+      {/* Onboarding overlay (shows only for new raters) */}
+      <RaterOnboarding />
 
       {/* top padding prevents overlap with sticky header */}
       <section className="pt-24 pb-10">
@@ -37,3 +43,4 @@ export default function RaterHomePage() {
     </main>
   );
 }
+

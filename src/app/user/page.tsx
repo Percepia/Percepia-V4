@@ -2,10 +2,15 @@
 import type { Route } from "next";
 import Link from "next/link";
 import Container from "@/components/container";
+// ⬇️ add this import (path matches where you said you put it)
+import UserOnboarding from "@/app/user/UserOnboarding";
 
 export default function UserDashboard() {
   return (
     <main className="route">
+      {/* Onboarding overlay (shows only for new users) */}
+      <UserOnboarding />
+
       <section className="py-12">
         <Container>
           <h1 className="text-3xl font-black mb-6">Your dashboard</h1>
