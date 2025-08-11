@@ -1,10 +1,17 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import Container from "@/components/container";
-import { saveNewUserRequest } from "@/lib/services/user-requests";
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  limit as qLimit,
+} from "firebase/firestore";
 
 type Step = 1 | 2 | 3 | 4;
 type AssignMode = "auto" | "pick";
@@ -15,11 +22,7 @@ const ACCENT = "#46A2FF";
 const MAX_SIZE_MB = 100;
 const ACCEPTED = "image/*,video/*,audio/*";
 
-const SAMPLE_RATERS = [
-  { id: "alexandra", name: "Alexandra • Top 1%" },
-  { id: "jamal", name: "Jamal • Fashion" },
-  { id: "mina", name: "Mina • Hair & Makeup" }
-];
+type TopRater = { uid: string; name?: string; count?: number };
 
 export default function RequestWizardPage() {
   const router = useRouter();
@@ -36,14 +39,28 @@ export default function RequestWizardPage() {
 
   const [coins, setCoins] = useState<number>(20);
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
+  // 🔹 live top 3 raters (no dummies)
+  const [topRaters, setTopRaters] = useState<TopRater[]>([]);
   useEffect(() => {
-    // clean up object URL on unmount
-    return () => {
-      if (fileUrl) URL.revokeObjectURL(fileUrl);
-    };
-  }, [fileUrl]);
+    const q = query(
+      collection(db, "leaderboard_raters"),
+      orderBy("count", "desc"),
+      qLimit(3)
+    );
+    const stop = onSnapshot(q, (snap) => {
+      const rows: TopRater[] = snap.docs.map((d) => {
+        const data = d.data() as any;
+        return {
+          uid: d.id,
+          name: data.name || data.displayName || undefined,
+          count: typeof data.count === "number" ? data.count : 0,
+        };
+      });
+      setTopRaters(rows);
+    });
+    return stop;
+  }, []);
 
   const resetError = () => setError("");
   const clampStep = (n: number): Step => (n < 1 ? 1 : n > 4 ? 4 : (n as Step));
@@ -80,7 +97,12 @@ export default function RequestWizardPage() {
     resetError();
     if (step === 1 && !file) return setError("Please select a media file.");
     if (step === 2 && (!title || title.trim().length < 3)) return setError("Add a short title.");
-    if (step === 3 && assignMode === "pick" && !chosenRater) return setError("Pick a rater or choose Auto.");
+    if (step === 3) {
+      if (assignMode === "pick") {
+        if (topRaters.length === 0) return setError("No raters available right now. Try Auto-assign.");
+        if (!chosenRater) return setError("Please pick a rater.");
+      }
+    }
     setStep((s) => clampStep(s + 1));
   }
 
@@ -89,28 +111,12 @@ export default function RequestWizardPage() {
     step > 1 ? setStep((s) => clampStep(s - 1)) : router.back();
   }
 
-  async function submit() {
+  function submit() {
     resetError();
     if (!file) return setError("No file selected.");
     if (!title || title.trim().length < 3) return setError("Provide a valid title.");
     if (assignMode === "pick" && !chosenRater) return setError("Pick a rater.");
-
-    try {
-      setSubmitting(true);
-      await saveNewUserRequest({
-        title,
-        notes,
-        assignMode,
-        chosenRater,
-        coins,
-        file,
-      });
-      router.push("/user/history" as Route);
-    } catch (e: any) {
-      setError(e?.message || "Something went wrong while saving your request.");
-    } finally {
-      setSubmitting(false);
-    }
+    router.push("/user/history" as Route);
   }
 
   return (
@@ -165,7 +171,6 @@ export default function RequestWizardPage() {
                       type="button"
                       onClick={clearFile}
                       className="btn-3d px-4 py-2 rounded-full border border-white/10"
-                      disabled={submitting}
                     >
                       Remove
                     </button>
@@ -195,7 +200,7 @@ export default function RequestWizardPage() {
               </div>
             )}
 
-            {/* STEP 2 — details (restyled) */}
+            {/* STEP 2 — details */}
             {step === 2 && (
               <div className="grid gap-6">
                 <label>
@@ -244,21 +249,31 @@ export default function RequestWizardPage() {
                 </div>
 
                 {assignMode === "pick" && (
-                  <label className="block">
-                    <span className="mb-1 block text-sm text-zinc-400">Choose a rater</span>
-                    <select
-                      className="input"
-                      value={chosenRater}
-                      onChange={(e) => setChosenRater(e.target.value)}
-                    >
-                      <option value="">Select…</option>
-                      {SAMPLE_RATERS.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <div className="grid gap-2">
+                    <label className="block">
+                      <span className="mb-1 block text-sm text-zinc-400">Choose a rater</span>
+                      <select
+                        className="input"
+                        value={chosenRater}
+                        onChange={(e) => setChosenRater(e.target.value)}
+                        disabled={topRaters.length === 0}
+                      >
+                        <option value="">{topRaters.length ? "Select…" : "No raters available"}</option>
+                        {topRaters.map((r) => (
+                          <option key={r.uid} value={r.uid}>
+                            {(r.name && r.name.trim()) || `Rater ${r.uid.slice(0, 6)}`}{" "}
+                            {typeof r.count === "number" ? `• ${r.count} ratings` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {topRaters.length === 0 && (
+                      <div className="text-xs text-zinc-500">
+                        No one on the leaderboard yet. You can still choose Auto-assign.
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -280,7 +295,11 @@ export default function RequestWizardPage() {
                   <div className="rounded-md border border-white/10 p-4">
                     <p className="text-sm text-zinc-400">Assignment</p>
                     <p className="font-semibold">
-                      {assignMode === "auto" ? "Auto-assign" : chosenRater || "—"}
+                      {assignMode === "auto"
+                        ? "Auto-assign"
+                        : chosenRater
+                        ? (topRaters.find((r) => r.uid === chosenRater)?.name || `Rater ${chosenRater.slice(0, 6)}`)
+                        : "—"}
                     </p>
 
                     <div className="mt-4">
@@ -318,7 +337,6 @@ export default function RequestWizardPage() {
               type="button"
               onClick={prevStep}
               className="btn-3d rounded-full border border-white/10 px-5 py-2"
-              disabled={submitting}
             >
               Back
             </button>
@@ -328,7 +346,6 @@ export default function RequestWizardPage() {
                 type="button"
                 onClick={nextStep}
                 className="btn-3d btn-primary-3d rounded-full bg-[--accent] px-6 py-2 text-black"
-                disabled={submitting}
               >
                 Next
               </button>
@@ -337,9 +354,8 @@ export default function RequestWizardPage() {
                 type="button"
                 onClick={submit}
                 className="btn-3d btn-primary-3d rounded-full bg-[--accent] px-6 py-2 text-black"
-                disabled={submitting}
               >
-                {submitting ? "Submitting…" : "Submit"}
+                Submit
               </button>
             )}
           </div>
